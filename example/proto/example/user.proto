@@ -1,0 +1,81 @@
+syntax = "proto3";
+
+package example;
+
+option go_package = "github.com/pubgo/protoc-gen-go-json/example/gen/example";
+
+// User represents a user in the system
+message User {
+  // User's unique identifier
+  string id = 1;
+  
+  // User's display name
+  string name = 2;
+  
+  // User's email address
+  string email = 3;
+  
+  // User's age
+  int32 age = 4;
+  
+  // User's role
+  Role role = 5;
+  
+  // User's address information
+  Address address = 6;
+  
+  // User's phone numbers
+  repeated string phone_numbers = 7;
+  
+  // User's metadata
+  map<string, string> metadata = 8;
+  
+  // Optional nickname
+  optional string nickname = 9;
+  
+  // Contact information (oneof)
+  oneof contact {
+    string mobile = 10;
+    string landline = 11;
+  }
+}
+
+// Address represents a physical address
+message Address {
+  string street = 1;
+  string city = 2;
+  string state = 3;
+  string zip_code = 4;
+  string country = 5;
+}
+
+// Role represents user roles
+enum Role {
+  ROLE_UNSPECIFIED = 0;
+  ROLE_USER = 1;
+  ROLE_ADMIN = 2;
+  ROLE_MODERATOR = 3;
+}
+
+// UserList represents a list of users
+message UserList {
+  repeated User users = 1;
+  int32 total = 2;
+  int32 page = 3;
+  int32 page_size = 4;
+}
+
+// CreateUserRequest represents a request to create a user
+message CreateUserRequest {
+  string name = 1;
+  string email = 2;
+  int32 age = 3;
+  Role role = 4;
+}
+
+// CreateUserResponse represents a response after creating a user
+message CreateUserResponse {
+  User user = 1;
+  bool success = 2;
+  string message = 3;
+}

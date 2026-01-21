@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"log/slog"
+	"os"
 
 	"github.com/pubgo/protoc-gen-go-json/internal"
 	"github.com/pubgo/protoc-gen-go-json/logging"
@@ -11,7 +12,15 @@ import (
 	"google.golang.org/protobuf/types/pluginpb"
 )
 
+// Build info, injected at build time via -ldflags
 var (
+	version = "dev"
+	commit  = "none"
+	date    = "unknown"
+)
+
+var (
+	showVersion  = flag.Bool("version", false, "print version information")
 	enumsAsInts  = flag.Bool("enums_as_ints", false, "render enums as integers as opposed to strings")
 	emitDefaults = flag.Bool("emit_defaults", false, "render fields with zero values")
 	origName     = flag.Bool("orig_name", false, "use original (.proto) name for fields")
@@ -21,6 +30,11 @@ var (
 
 func main() {
 	flag.Parse()
+
+	if *showVersion {
+		fmt.Printf("protoc-gen-go-json %s (commit: %s, built at: %s)\n", version, commit, date)
+		os.Exit(0)
+	}
 
 	logging.Setup(debug)
 

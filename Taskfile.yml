@@ -1,0 +1,79 @@
+# https://taskfile.dev
+
+version: '3'
+
+vars:
+  BINARY_NAME: protoc-gen-go-json
+  VERSION:
+    sh: git describe --tags --always --dirty 2>/dev/null || echo "dev"
+  COMMIT:
+    sh: git rev-parse --short HEAD 2>/dev/null || echo "none"
+  DATE:
+    sh: date -u '+%Y-%m-%dT%H:%M:%SZ'
+  LDFLAGS: -s -w -X main.version={{.VERSION}} -X main.commit={{.COMMIT}} -X main.date={{.DATE}}
+
+tasks:
+  default:
+    desc: Show available tasks
+    cmds:
+      - task --list
+
+  build:
+    desc: Build the binary
+    cmds:
+      - go build -ldflags "{{.LDFLAGS}}" -o {{.BINARY_NAME}} .
+
+  install:
+    desc: Install the plugin to $GOPATH/bin
+    cmds:
+      - go install -ldflags "{{.LDFLAGS}}" .
+
+  clean:
+    desc: Clean build artifacts
+    cmds:
+      - rm -f {{.BINARY_NAME}}
+      - go clean
+
+  test:
+    desc: Run tests
+    cmds:
+      - go test -v ./...
+
+  test:coverage:
+    desc: Run tests with coverage
+    cmds:
+      - go test -v -coverprofile=coverage.out ./...
+      - go tool cover -html=coverage.out -o coverage.html
+
+  lint:
+    desc: Run linter
+    cmds:
+      - golangci-lint run ./...
+
+  fmt:
+    desc: Format code
+    cmds:
+      - gofmt -s -w .
+
+  tidy:
+    desc: Tidy and verify go modules
+    cmds:
+      - go mod tidy
+      - go mod verify
+
+  version:
+    desc: Show version information
+    cmds:
+      - echo "Version {{.VERSION}} (commit {{.COMMIT}}, built at {{.DATE}})"
+
+  release:snapshot:
+    desc: Create a snapshot release (for testing)
+    cmds:
+      - goreleaser release --snapshot --clean
+
+  proto:gen:
+    desc: Generate protobuf code for examples
+    cmds:
+      - task install
+      - protobuild vendor
+      - protobuild gen
